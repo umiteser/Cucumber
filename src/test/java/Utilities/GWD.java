@@ -2,6 +2,7 @@ package Utilities;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
@@ -10,7 +11,7 @@ import java.util.Locale;
 
 public class GWD {
 
-    public static ThreadLocal<WebDriver> threadDriver=new ThreadLocal<>();  // thread e özel driver
+    private static ThreadLocal<WebDriver> threadDriver=new ThreadLocal<>();  // thread e özel driver
     public static ThreadLocal<String> threadBrowserName=new ThreadLocal<>(); // o thread e özel browser name
 
     //threadDriver.get() -> bulunduğum thread deki driver ı al
@@ -29,7 +30,16 @@ public class GWD {
             {
                 case "firefox" : threadDriver.set(new FirefoxDriver()); break;
                 case "edge" : threadDriver.set(new EdgeDriver()); break;
-                default: threadDriver.set(new ChromeDriver());  //bulunduğum hatta driver yok idi, ben bir tane set ettim
+                default:
+
+                    if (isRunningOnJenkins()){ //program jenkins den mi çalışıyor
+                        ChromeOptions options = new ChromeOptions();
+                        options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--window-size=1400,2400");
+
+                        threadDriver.set(new ChromeDriver(options));  //bulunduğum hatta driver yok idi, ben bir tane set ettim
+                    }
+                    else
+                        threadDriver.set(new ChromeDriver());
             }
 
             threadDriver.get().manage().window().maximize();
@@ -39,6 +49,11 @@ public class GWD {
         return threadDriver.get();
     }
 
+
+    public static boolean isRunningOnJenkins() {
+        String jenkinsHome = System.getenv("JENKINS_HOME");
+        return jenkinsHome != null && !jenkinsHome.isEmpty();
+    }
 
 
     public static void quitDriver(){
@@ -61,4 +76,5 @@ public class GWD {
         }
 
     }
+
 }

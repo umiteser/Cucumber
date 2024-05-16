@@ -1,16 +1,11 @@
 package StepDefinitions;
 
+import Utilities.ExcelUtility;
 import Utilities.GWD;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 
-import java.io.File;
-import java.io.IOException;
-
-import static Utilities.GWD.threadDriver;
 
 public class Hooks {
 
@@ -22,6 +17,9 @@ public class Hooks {
     @After // Cucumber ın Annotation ı
     // her senaryodan sonra çalışır
     public void after(Scenario senaryo){
+
+        ExcelUtility.writeToExcel("src/test/java/ApachePOI/resource/CucumberTestSonuclari.xlsx",
+                senaryo.getName()+" "+(senaryo.isFailed()? "Failed": "Passed") );
 
         //senaryo fail olduysa ekran kaydı al
         if (senaryo.isFailed()){
